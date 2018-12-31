@@ -1,0 +1,45 @@
+{
+    "name": "MQM", "children": [{
+        "name": "Technical",
+        "children": [{"name": "Data Infrastructure", "size": 1},
+            {"name": "Applied Probability & Stats", "size": 1},
+            {"name": "Data Science", "size": 1},
+            {"name": "Decision Analytics", "size": 1},
+            {"name": "Data Visualization", "size": 1},
+            {"name": "Ethical Issues of Analytics", "size": 0.75}]
+    }, {
+        "name": "Business",
+        "children": [{"name": "Bus. Communication 1-2", "size": 2},
+            {"name": "Business Fundamentals", "size": 1},
+            {"name": "Critical Thinking", "size": 0.5},
+            {"name": "Collaboration", "size": 0.5},
+            {"name": "Navigating Organizations", "size": 1}]
+    }, {
+        "name": "Functional",
+        "children": [{"name": "Marketing", "children":[
+            {"name": "Digital Marketing", "size": 1},
+            {"name": "Market Intelligence", "size": 1},
+            {"name": "CRM", "size": 1},
+            {"name": "Pricing", "size": 1}
+        ]},
+        {"name": "Finance", "children":[
+            {"name": "Intro to Finance", "size": 1},
+            {"name": "Intermediate Finance", "size": 1},
+            {"name": "Derivatives", "size": 1},
+            {"name": "Fixed Income Securities", "size": 1},
+            {"name": "Fin. Risk Management", "size": 1}
+        ]},
+        {"name": "Strategy", "children":[
+            {"name": "Empirical Economics", "size": 1},
+            {"name": "Operations Analytics", "size": 1},
+            {"name": "Strategic Management", "size": 1},
+            {"name": "People Analytics", "size": 1}
+        ]},
+        {"name": "Forensics", "children":[
+            {"name": "Financial Reporting", "size": 1},
+            {"name": "Fin. Statement Fraud", "size": 1},
+            {"name": "Managing Risks", "size": 1},
+            {"name": "Fraud Analytics", "size": 1}
+        ]}]
+    }]
+}
