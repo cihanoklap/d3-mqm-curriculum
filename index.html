@@ -38,45 +38,81 @@ body {
     d3.json("data.json", function(error, nodeData) {
         if (error) throw error;
 
-        // Find the root node of our data, and begin sizing process.
-        var root = d3.hierarchy(nodeData)
-            .sum(function (d) { return d.size});
+        allNodes = nodeData;
+        var showNodes = JSON.parse(JSON.stringify(nodeData));
+        drawSunburst(allNodes);
+    });
+    
+    function drawSunburst(data) {
+        // Find the root node, calculate the node.value, and sort our nodes by node.value
+        root = d3.hierarchy(data)
+            .sum(function (d) { return d.size; })
+            .sort(function (a, b) { return b.value - a.value; });
 
-        // Calculate the sizes of each arc that we'll draw later.
+        // Calculate the size of each arc; save the initial angles for tweening.
         partition(root);
-        var arc = d3.arc()
-                    .startAngle(d => d.x0)
-                    .endAngle(d => d.x1)
-                    .padAngle(d => Math.min((d.x1 - d.x0) / 2, 0.005))
-                    .padRadius(radius / 2)
-                    .innerRadius(d => d.y0)
-                    .outerRadius(d => d.y1 - 1)
+        arc = d3.arc()
+                .startAngle(d => d.x0)
+                .endAngle(d => d.x1)
+                .padAngle(d => Math.min((d.x1 - d.x0) / 2, 0.005))
+                .padRadius(radius / 2)
+                .innerRadius(d => d.y0)
+                .outerRadius(d => d.y1 - 1);
 
+        // Add a <g> element for each node; create the slice variable since we'll refer to this selection many times
+        slice = g.selectAll('g.node').data(root.descendants(), function(d) { return d.data.name; }); // .enter().append('g').attr("class", "node");
+        newSlice = slice.enter().append('g').attr("class", "node").merge(slice);
+        slice.exit().remove();
 
-        // Add a <g> element for each node in thd data, then append <path> elements and draw lines based on the arc
-        // variable calculations. Last, color the lines and the slices.
-        g.selectAll('g')
-            .data(root.descendants())
-            .enter().append('g').attr("class", "node").append('path')
-            .attr("display", function (d) { return d.depth ? null : "none"; })
+        // Append <path> elements and draw lines based on the arc calculations. Last, color the lines and the slices.
+        slice.selectAll('path').remove();
+        newSlice.append('path').attr("display", function (d) { return d.depth ? null : "none"; })
             .attr("d", arc)
             .style('stroke', '#fff')
             .attr("fill", d => { while (d.depth > 1) d = d.parent; return color(d.data.name); });
 
-
         // Populate the <text> elements with our data-driven titles.
-        g.selectAll(".node")
-            .append("text")
+        slice.selectAll('text').remove();
+        newSlice.append("text")
             .attr("transform", function(d) {
-                const x = (d.x0 + d.x1) / 2 * 180 / Math.PI;
-                const y = (d.y0 + d.y1) / 2;
-                return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`})            
-            //.attr("dx", "-20") // radius margin
-            //.attr("dy", ".35em") // rotation align
+                return "translate(" + arc.centroid(d) + ")rotate(" + computeTextRotation(d) + ")"; })
             .attr('text-anchor', 'middle')
             .text(function(d) { return d.parent ? d.data.name : "" });
 
-    });
+        newSlice.on("click", highlightSelectedSlice);
+        };
+
+         // Redraw the Sunburst Based on User Input
+    function highlightSelectedSlice(c,i) {
+
+        clicked = c;
+        var rootPath = clicked.path(root).reverse();
+        rootPath.shift(); // remove root node from the array
+
+        newSlice.style("opacity", 0.4);
+        newSlice.filter(function(d) {
+            if (d === clicked && d.prevClicked) {
+                d.prevClicked = false;
+                newSlice.style("opacity", 1);
+                return true;
+
+            } else if (d === clicked) {
+                d.prevClicked = true;
+                return true;
+            } else {
+                d.prevClicked = false;
+                return (rootPath.indexOf(d) >= 0);
+            }
+        })
+            .style("opacity", 1);
+
+    };
 
 
+    function computeTextRotation(d) {
+        var angle = (d.x0 + d.x1) / Math.PI * 90;
+        return (angle < 180) ? angle -90 : angle + 90;
+    }
+
+    update(data)
 </script>
