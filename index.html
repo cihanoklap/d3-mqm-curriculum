@@ -5,6 +5,8 @@
     <script src="https://d3js.org/d3-color.v1.min.js"></script>
     <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+      <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
 <script>
 
 var yellow = d3.interpolateYlGn(0), // "rgb(255, 255, 229)"
@@ -24,48 +26,82 @@ text {
     pointer-events: none;  /* Make text "non selectable" */
 }
 
-button {
-    border: none;
-    color: white;
-    padding: 6px 12px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
+label{
+background: #283593 !important;
+margin-left: 4px;
+width: 100%;
+padding: 10px;
+font-size: 0.9em;
+color: #e0e0e0 ;
+cursor: pointer;
+}
+label.active{
+background: #00bfa5 !important;
 }
 
-#leftButton {
-    border-radius: 10px 3px 3px 10px;
-}
-
-#rightButton {
-    border-radius: 3px 10px 10px 3px;
-}
+  
 
 </style>
-<body>
-    <svg></svg><br>
-    Track: <label><input class="track" type = "radio" name="track" value="All" checked> All</label>
-    <label><input class="track" type = "radio" name="track" value="Marketing" > Marketing</label>
-    <label><input class="track"  type="radio" name="track" value="Finance"> Finance</label>
-    <label><input class="track"  type="radio" name="track" value="Strategy"> Strategy</label>
-    <label><input class="track"  type="radio" name="track" value="Forensics"> Forensics</label><br>
+<body class= "indigo">
+    <header class="indigo darken-2 section">
+        <h2 class="center white-text">MQM Curriculum</h2>
+        <p class="flow-text grey-text center text-lighten-2"> Offered Courses for different tracks... </p>    
+    </header> 
+    <div class="container section">
+        <div class="row">
+            <div class="col s12 l6">
+                <div class="canvas"></div>
+            </div>
+            <div class="col s12 l5 push-1">
+                    <br><br>
+                    <text class="white-text">While any good analyst is trained to gather data and report findings, Fuqua School of Business MQM: Business Analytics 
+                    curriculum is designed to give you an edge—ensuring you’re equally comfortable analyzing the data, 
+                    collaborating with teammates, and persuading managers to act on your insights.</text><br><br>
+                    <text class="white-text">Your track in Fuqua's MQM: Business Analytics program 
+                    will help you gain the knowledge and skills you'll need in your future career.</text><br>
+                    <br>
+                    <text class="white-text"> Choose a track to see the offered courses only for that track:</text><br>
+                    <br>
+                    <label><input class="track" name="track" type="radio" value="All" checked> All</label>
+                    <label><input class="track"  name="track" type="radio" value="Marketing" > Marketing</label>
+                    <label><input class="track"  type="radio" name="track" value="Finance"> Finance</label>
+                    <label><input class="track"  type="radio" name="track" value="Strategy"> Strategy</label>
+                    <label><input class="track"  type="radio" name="track" value="Forensics"> Forensics</label>
+            </div>
+        </div>
+    </div>
+
+
 </body>
 
 <script>
 
     // Variables
-    var width = 600;
-    var height = 600;
-    var radius = Math.min(width, height) / 2;
+    const margin = { top: 40, right: 80, bottom: 10, left: 60 };
+    const graphWidth = 720 - margin.left - margin.right;
+    const graphHeight = 720 - margin.top - margin.bottom;
+
+    const svg = d3.select('.canvas')
+        .append('svg')
+        .attr('width', graphWidth + margin.left + margin.right)
+        .attr('height', graphHeight + margin.top + margin.bottom)
+
+    const graph = svg.append('g')
+        .attr('width', graphWidth)
+        .attr('height', graphHeight)
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+
+ 
+    var radius = Math.min(graphWidth, graphHeight) / 2;
     var color = d3.scaleOrdinal(d3.schemeBlues[7]);
 
     // Size our <svg> element, add a <g> element, and move translate 0,0 to the center of the element.
     var g = d3.select('svg')
-        .attr('width', width)
-        .attr('height', height)
+        .attr('width', graphWidth)
+        .attr('height', graphHeight)
         .style("font", "8px sans-serif")
         .append('g')
-        .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
+        .attr('transform', 'translate(' + graphWidth / 2 + ',' + graphHeight / 2 + ')');
 
     // Create our sunburst data structure and size it.
     var partition = d3.partition()
@@ -97,8 +133,15 @@ button {
                 .outerRadius(d => d.y1 - 1);
 
         // Add a <g> element for each node; create the slice variable since we'll refer to this selection many times
-        slice = g.selectAll('g.node').data(root.descendants(), function(d) { return d.data.name; }); // .enter().append('g').attr("class", "node");
-        newSlice = slice.enter().append('g').attr("class", "node").merge(slice);
+        slice = g.selectAll('g.node')
+            .data(root.descendants(), function(d) { return d.data.name; }); // .enter().append('g').attr("class", "node");
+        
+        newSlice = slice.enter()
+            .append('g')
+            .attr("class", "node")
+            .merge(slice);
+        
+        
         slice.exit().remove();
 
         // TRY 1: ID selection that's has been drawn previously... (requires us to set "drawn" down below)
@@ -190,5 +233,6 @@ button {
         return (angle < 180) ? angle -90 : angle + 90;
     }
 
-    update(data)
+    update(data);
+
 </script>
