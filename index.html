@@ -2,6 +2,16 @@
 <head>
     <title>MQM Curriculum</title>
     <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="https://d3js.org/d3-color.v1.min.js"></script>
+    <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<script>
+
+var yellow = d3.interpolateYlGn(0), // "rgb(255, 255, 229)"
+    yellowGreen = d3.interpolateYlGn(0.5), // "rgb(120, 197, 120)"
+    green = d3.interpolateYlGn(1); // "rgb(0, 69, 41)"
+
+</script>
 </head>
 <style>
 @import url('https://fonts.googleapis.com/css?family=Raleway');
@@ -9,18 +19,45 @@
 body {
   font-family: "Raleway", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
+
+text {
+    pointer-events: none;  /* Make text "non selectable" */
+}
+
+button {
+    border: none;
+    color: white;
+    padding: 6px 12px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+}
+
+#leftButton {
+    border-radius: 10px 3px 3px 10px;
+}
+
+#rightButton {
+    border-radius: 3px 10px 10px 3px;
+}
+
 </style>
 <body>
-    <svg></svg>
+    <svg></svg><br>
+    Track: <label><input class="track" type = "radio" name="track" value="All" checked> All</label>
+    <label><input class="track" type = "radio" name="track" value="Marketing" > Marketing</label>
+    <label><input class="track"  type="radio" name="track" value="Finance"> Finance</label>
+    <label><input class="track"  type="radio" name="track" value="Strategy"> Strategy</label>
+    <label><input class="track"  type="radio" name="track" value="Forensics"> Forensics</label><br>
 </body>
 
 <script>
 
     // Variables
-    var width = 800;
-    var height = 800;
+    var width = 600;
+    var height = 600;
     var radius = Math.min(width, height) / 2;
-    var color = d3.scaleOrdinal(d3.schemeCategory20b);
+    var color = d3.scaleOrdinal(d3.schemeBlues[7]);
 
     // Size our <svg> element, add a <g> element, and move translate 0,0 to the center of the element.
     var g = d3.select('svg')
@@ -42,7 +79,7 @@ body {
         var showNodes = JSON.parse(JSON.stringify(nodeData));
         drawSunburst(allNodes);
     });
-    
+
     function drawSunburst(data) {
         // Find the root node, calculate the node.value, and sort our nodes by node.value
         root = d3.hierarchy(data)
@@ -64,6 +101,18 @@ body {
         newSlice = slice.enter().append('g').attr("class", "node").merge(slice);
         slice.exit().remove();
 
+        // TRY 1: ID selection that's has been drawn previously... (requires us to set "drawn" down below)
+        //newSlice.filter ( function(d) { return !d.drawn; }).append('path')
+        //    .attr("display", function (d) { return d.depth ? null : "none"; }).style('stroke', '#fff');
+
+        // TRY 2: Only create paths on "first run"
+        //if (firstRun) {
+        //    newSlice.append('path').attr("display", function (d) { return d.depth ? null : "none"; }).style('stroke', '#fff');
+        //}
+
+        // TRY 1&2: Set path-d and color always. But this isn't using new arc...?
+        //newSlice.selectAll('path').attr("d", arc).style("fill", function (d) { return color((d.children ? d : d.parent).data.name); });
+
         // Append <path> elements and draw lines based on the arc calculations. Last, color the lines and the slices.
         slice.selectAll('path').remove();
         newSlice.append('path').attr("display", function (d) { return d.depth ? null : "none"; })
@@ -81,6 +130,9 @@ body {
 
         newSlice.on("click", highlightSelectedSlice);
         };
+
+    d3.selectAll(".track").on("click", showSelectedTrack);
+
 
          // Redraw the Sunburst Based on User Input
     function highlightSelectedSlice(c,i) {
@@ -105,6 +157,30 @@ body {
             }
         })
             .style("opacity", 1);
+
+    };
+
+        // Selecting track
+    function showSelectedTrack(r, i) {
+        //alert(this.value);
+        var showNodes = JSON.parse(JSON.stringify(allNodes));
+
+        // Determine how to size the slices.
+        if (this.value === "Marketing") {
+            showNodes.children.splice(3);
+        } else if (this.value === "Finance") {
+            showNodes.children.splice(2,1);
+            showNodes.children.pop();
+            showNodes.children.pop();
+        } else if (this.value === "Strategy") {
+            showNodes.children.splice(2,2);
+            showNodes.children.pop();
+        } else if (this.value === "Forensics") {
+            showNodes.children.splice(2, 3);
+        } else {
+            showNodes;
+        }
+        drawSunburst(showNodes);
 
     };
 
