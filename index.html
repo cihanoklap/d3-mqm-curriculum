@@ -35,10 +35,14 @@ font-size: 0.9em;
 color: #e0e0e0 ;
 cursor: pointer;
 }
-label.active{
-background: #00bfa5 !important;
-}
 
+#tooltip { 
+background-color: white;
+padding: 3px 5px;
+border: 1px solid black;
+text-align: left;
+font-size: 0.8em;
+}
   
 
 </style>
@@ -49,10 +53,7 @@ background: #00bfa5 !important;
     </header> 
     <div class="container section">
         <div class="row">
-            <div class="col s12 l6">
-                <div class="canvas"></div>
-            </div>
-            <div class="col s12 l5 push-1">
+            <div class="col s12 m12 l5">
                     <br><br>
                     <text class="white-text">While any good analyst is trained to gather data and report findings, Fuqua School of Business MQM: Business Analytics 
                     curriculum is designed to give you an edge—ensuring you’re equally comfortable analyzing the data, 
@@ -68,16 +69,20 @@ background: #00bfa5 !important;
                     <label><input class="track"  type="radio" name="track" value="Strategy"> Strategy</label>
                     <label><input class="track"  type="radio" name="track" value="Forensics"> Forensics</label>
             </div>
+            <div class="col s12 m12 l1">
+            </div>
+            <div class="col s12 m12 l6">
+                <div class="canvas"></div>
+            </div>
         </div>
     </div>
-
 
 </body>
 
 <script>
 
     // Variables
-    const margin = { top: 40, right: 80, bottom: 10, left: 60 };
+    const margin = { top: 40, right: 60, bottom: 10, left: 80 };
     const graphWidth = 720 - margin.left - margin.right;
     const graphHeight = 720 - margin.top - margin.bottom;
 
@@ -89,11 +94,11 @@ background: #00bfa5 !important;
     const graph = svg.append('g')
         .attr('width', graphWidth)
         .attr('height', graphHeight)
-        .attr('transform', `translate(${margin.left},${margin.top})`);
+        .attr('transform', `translate(${margin.right},${margin.top})`);
 
  
     var radius = Math.min(graphWidth, graphHeight) / 2;
-    var color = d3.scaleOrdinal(d3.schemeBlues[7]);
+    var color = d3.scaleOrdinal(d3.schemeBlues[8]);
 
     // Size our <svg> element, add a <g> element, and move translate 0,0 to the center of the element.
     var g = d3.select('svg')
@@ -106,6 +111,14 @@ background: #00bfa5 !important;
     // Create our sunburst data structure and size it.
     var partition = d3.partition()
         .size([2 * Math.PI, radius]);
+
+    //Tooltip description
+    var tooltip = d3.select("body")
+        .append("div")
+        .attr("id", "tooltip")
+        .style("position", "absolute")
+        .style("z-index", "10")
+        .style("opacity", 0);
 
     // Get the data from our JSON file
     d3.json("data.json", function(error, nodeData) {
@@ -129,7 +142,7 @@ background: #00bfa5 !important;
                 .endAngle(d => d.x1)
                 .padAngle(d => Math.min((d.x1 - d.x0) / 2, 0.005))
                 .padRadius(radius / 2)
-                .innerRadius(d => d.y0)
+                .innerRadius(d => d.y0 -2)
                 .outerRadius(d => d.y1 - 1);
 
         // Add a <g> element for each node; create the slice variable since we'll refer to this selection many times
@@ -139,22 +152,13 @@ background: #00bfa5 !important;
         newSlice = slice.enter()
             .append('g')
             .attr("class", "node")
-            .merge(slice);
-        
+            .merge(slice)
+            .on("mouseover", mouseOverArc)
+            .on("mousemove", mouseMoveArc)
+            .on("mouseout", mouseOutArc);
+                
         
         slice.exit().remove();
-
-        // TRY 1: ID selection that's has been drawn previously... (requires us to set "drawn" down below)
-        //newSlice.filter ( function(d) { return !d.drawn; }).append('path')
-        //    .attr("display", function (d) { return d.depth ? null : "none"; }).style('stroke', '#fff');
-
-        // TRY 2: Only create paths on "first run"
-        //if (firstRun) {
-        //    newSlice.append('path').attr("display", function (d) { return d.depth ? null : "none"; }).style('stroke', '#fff');
-        //}
-
-        // TRY 1&2: Set path-d and color always. But this isn't using new arc...?
-        //newSlice.selectAll('path').attr("d", arc).style("fill", function (d) { return color((d.children ? d : d.parent).data.name); });
 
         // Append <path> elements and draw lines based on the arc calculations. Last, color the lines and the slices.
         slice.selectAll('path').remove();
@@ -173,15 +177,14 @@ background: #00bfa5 !important;
 
         newSlice.on("click", highlightSelectedSlice);
         };
-
+        
     d3.selectAll(".track").on("click", showSelectedTrack);
-
 
          // Redraw the Sunburst Based on User Input
     function highlightSelectedSlice(c,i) {
 
         clicked = c;
-        var rootPath = clicked.path(root).reverse();
+        var rootPath = clicked.path(root).reverse()
         rootPath.shift(); // remove root node from the array
 
         newSlice.style("opacity", 0.4);
@@ -227,6 +230,28 @@ background: #00bfa5 !important;
 
     };
 
+    function format_description(d) {
+        var description = d.description;
+        return  '<b>' + d.data.fullname + '</b></br>'+ d.data.description;
+    }
+
+    function mouseOverArc(d) {                
+        tooltip.html(format_description(d));
+        return tooltip.transition()
+            .duration(0)
+            .style("opacity", 0.9);
+        }
+
+    function mouseOutArc(){
+        d3.select(this).attr("stroke","")
+        return tooltip.style("opacity", 0);
+    }
+
+    function mouseMoveArc (d) {
+            return tooltip
+                .style("top", (d3.event.pageY-10)+"px")
+                .style("left", (d3.event.pageX+10)+"px");
+    }
 
     function computeTextRotation(d) {
         var angle = (d.x0 + d.x1) / Math.PI * 90;
