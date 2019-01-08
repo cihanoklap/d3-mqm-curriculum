@@ -68,6 +68,9 @@ font-size: 0.8em;
                     <label><input class="track"  type="radio" name="track" value="Finance"> Finance</label>
                     <label><input class="track"  type="radio" name="track" value="Strategy"> Strategy</label>
                     <label><input class="track"  type="radio" name="track" value="Forensics"> Forensics</label>
+                    <br><br>
+                    <text class="white-text">Hover over the graph to see more detailed explanation of courses!</text><br>
+                    <br>
             </div>
             <div class="col s12 m12 l1">
             </div>
@@ -174,37 +177,9 @@ font-size: 0.8em;
                 return "translate(" + arc.centroid(d) + ")rotate(" + computeTextRotation(d) + ")"; })
             .attr('text-anchor', 'middle')
             .text(function(d) { return d.parent ? d.data.name : "" });
-
-        newSlice.on("click", highlightSelectedSlice);
         };
         
     d3.selectAll(".track").on("click", showSelectedTrack);
-
-         // Redraw the Sunburst Based on User Input
-    function highlightSelectedSlice(c,i) {
-
-        clicked = c;
-        var rootPath = clicked.path(root).reverse()
-        rootPath.shift(); // remove root node from the array
-
-        newSlice.style("opacity", 0.4);
-        newSlice.filter(function(d) {
-            if (d === clicked && d.prevClicked) {
-                d.prevClicked = false;
-                newSlice.style("opacity", 1);
-                return true;
-
-            } else if (d === clicked) {
-                d.prevClicked = true;
-                return true;
-            } else {
-                d.prevClicked = false;
-                return (rootPath.indexOf(d) >= 0);
-            }
-        })
-            .style("opacity", 1);
-
-    };
 
         // Selecting track
     function showSelectedTrack(r, i) {
@@ -230,19 +205,26 @@ font-size: 0.8em;
 
     };
 
+    // The content of tooltips
     function format_description(d) {
         var description = d.description;
         return  '<b>' + d.data.fullname + '</b></br>'+ d.data.description;
     }
 
+    // Opacity changes to highlight the tooltip more
     function mouseOverArc(d) {                
         tooltip.html(format_description(d));
+        newSlice.style("opacity", 0.4);
+        d3.select(this).transition()
+            .duration(1)
+            .style("opacity", 1);
         return tooltip.transition()
             .duration(0)
             .style("opacity", 0.9);
         }
 
     function mouseOutArc(){
+        newSlice.style("opacity", 1);
         d3.select(this).attr("stroke","")
         return tooltip.style("opacity", 0);
     }
@@ -253,6 +235,7 @@ font-size: 0.8em;
                 .style("left", (d3.event.pageX+10)+"px");
     }
 
+    // Same text rotation for different graphs
     function computeTextRotation(d) {
         var angle = (d.x0 + d.x1) / Math.PI * 90;
         return (angle < 180) ? angle -90 : angle + 90;
