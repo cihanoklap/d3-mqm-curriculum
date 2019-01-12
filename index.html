@@ -27,24 +27,37 @@ text {
 }
 
 label{
-background: #283593 !important;
-margin-left: 4px;
-width: 100%;
-padding: 10px;
-font-size: 0.9em;
-color: #e0e0e0 ;
-cursor: pointer;
+    background: #283593 !important;
+    margin-left: 4px;
+    width: 100%;
+    padding: 10px;
+    font-size: 0.9em;
+    color: #e0e0e0 ;
+    cursor: pointer;
 }
 
 #tooltip { 
-background-color: white;
-padding: 3px 5px;
-border: 1px solid black;
-text-align: left;
-font-size: 0.8em;
+    background-color: white;
+    padding: 3px 5px;
+    border: 1px solid black;
+    text-align: left;
+    font-size: 0.8em;
+}
+
+a:link {
+    color: white; 
+    background-color: transparent; 
+    text-decoration: none;
+    font-size: 0.5em;
+}
+
+a:visited {
+    color: white;
+    background-color: transparent;
+    text-decoration: none;
+    font-size: 0.5em;
 }
   
-
 </style>
 <body class= "indigo">
     <header class="indigo darken-2 section">
@@ -70,7 +83,10 @@ font-size: 0.8em;
                     <label><input class="track"  type="radio" name="track" value="Forensics"> Forensics</label>
                     <br><br>
                     <text class="white-text">Hover over the graph to see more detailed explanation of courses!</text><br>
-                    <br>
+                    <br><br><br><br><br><br><br><br><br>
+                    <a href="https://github.com/cihanoklap/d3-mqm-curriculum">Wanna check out the code?</a>
+
+
             </div>
             <div class="col s12 m12 l1">
             </div>
@@ -240,7 +256,5 @@ font-size: 0.8em;
         var angle = (d.x0 + d.x1) / Math.PI * 90;
         return (angle < 180) ? angle -90 : angle + 90;
     }
-
-    update(data);
 
 </script>
